@@ -61,6 +61,36 @@ final class ContactServiceTest extends TestCase
         );
     }
 
+    /**
+     * @throws Throwable
+     */
+    #[Test]
+    public function it_can_update_a_contact(): void
+    {
+        $contact = Contact::factory()->create([
+            'email' => 'another@gmail.com'
+        ]);
+
+        $entity = ContactEntity::fromEloquent(contact: $contact);
+        $entity->email = new EmailObject(email: 'bode.john@gmail.com');
+
+        $this->service()->update(
+            contact: $entity,
+            id: (string) $contact->id
+        );
+
+        $this->assertDatabaseHas(
+            table: 'contacts',
+            data: $entity->toArray()
+        );
+
+        $this->assertEquals(
+            expected: $entity->email,
+            actual: $contact->refresh()->email
+        )
+        ;
+    }
+
     protected function service(): ContactService
     {
         return new ContactService(
